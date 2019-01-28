@@ -33,8 +33,15 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/video/tracking.hpp"
 
+#if defined(USE_LOCAL_ARUCO)
 #include <aruco/aruco.h>
 #include <aruco/cvdrawingutils.h>
+#else
+#include <opencv2/aruco.hpp>
+#define isnanf isnan
+using namespace cv;
+using namespace std;
+#endif
 #include <opencv2/highgui/highgui.hpp>
 
 #include "BenchmarkDatasetReader.h"
@@ -45,6 +52,7 @@
 #include <fstream>
 #include <dirent.h>
 #include <algorithm>
+#include <iostream>
 
 
 // reads interpolated element from a uchar* array
@@ -185,6 +193,10 @@ void parseArgument(char* arg)
 
 int main( int argc, char** argv )
 {
+    if (argc<2) {
+        printf("please give dataset as first argument\n");
+        return -1;
+    }
 	for(int i=2; i<argc;i++)
 		parseArgument(argv[i]);
 
@@ -209,7 +221,14 @@ int main( int argc, char** argv )
 	w_out = reader->getUndistorter()->getOutputDims()[0];
 	h_out = reader->getUndistorter()->getOutputDims()[1];
 
+#if defined(USE_LOCAL_ARUCO)
 	aruco::MarkerDetector MDetector;
+#else
+	int dictionaryId = 16;
+	Ptr<aruco::DetectorParameters> detectorParams = aruco::DetectorParameters::create();
+	Ptr<aruco::Dictionary> dictionary =
+			aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(dictionaryId));
+#endif
 
 	std::vector<float*> images;
 	std::vector<float*> p2imgX;
@@ -229,22 +248,40 @@ int main( int argc, char** argv )
 
 	for(int i=0;i<reader->getNumImages();i+=imageSkip)
 	{
-        std::vector<aruco::Marker> Markers;
+#if defined(USE_LOCAL_ARUCO)
+		std::vector<aruco::Marker> Markers;
+#endif
 		ExposureImage* img = reader->getImage(i,true, false, false, false);
 
 		cv::Mat InImage;
 		cv::Mat(h_out, w_out, CV_32F, img->image).convertTo(InImage, CV_8U, 1, 0);
 		delete img;
 
+#if defined(USE_LOCAL_ARUCO)
 		MDetector.detect(InImage,Markers);
 		if(Markers.size() != 1) continue;
+#else
+		vector< int > ids;
+		vector< vector< Point2f > > corners, rejected;
+
+		// detect markers
+		aruco::detectMarkers(InImage, dictionary, corners, ids, detectorParams, rejected);
+        if (corners.size() != 1) continue;
+#endif
 
         std::vector<cv::Point2f> ptsP;
         std::vector<cv::Point2f> ptsI;
+#if defined(USE_LOCAL_ARUCO)
 		ptsI.push_back(cv::Point2f(Markers[0][0].x, Markers[0][0].y));
 		ptsI.push_back(cv::Point2f(Markers[0][1].x, Markers[0][1].y));
 		ptsI.push_back(cv::Point2f(Markers[0][2].x, Markers[0][2].y));
 		ptsI.push_back(cv::Point2f(Markers[0][3].x, Markers[0][3].y));
+#else
+		ptsI.push_back(corners[0][0]);
+		ptsI.push_back(corners[0][1]);
+		ptsI.push_back(corners[0][2]);
+		ptsI.push_back(corners[0][3]);
+#endif
 		ptsP.push_back(cv::Point2f(-0.5,0.5));
 		ptsP.push_back(cv::Point2f(0.5,0.5));
 		ptsP.push_back(cv::Point2f(0.5,-0.5));
