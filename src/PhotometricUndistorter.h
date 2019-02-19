@@ -27,6 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MONO_DATASET__PHOTOMETRIC_UNDISTORTER_H
+#define MONO_DATASET__PHOTOMETRIC_UNDISTORTER_H
 
 #include <opencv2/core/core.hpp>
 #include "Eigen/Core"
@@ -52,3 +54,5 @@ private:
 	bool validVignette;
 	bool validGamma;
 };
+
+#endif // MONO_DATASET__PHOTOMETRIC_UNDISTORTER_H

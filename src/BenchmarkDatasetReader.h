@@ -27,6 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MONO_DATASET__BENCHMARK_DATASET_READER_H
+#define MONO_DATASET__BENCHMARK_DATASET_READER_H
 
 #pragma once
 #include <sstream>
@@ -344,3 +346,4 @@ private:
 	float* internalTempBuffer;
 };
 
+#endif // MONO_DATASET__BENCHMARK_DATASET_READER_H

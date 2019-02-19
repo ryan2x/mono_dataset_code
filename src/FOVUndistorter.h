@@ -27,6 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef MONO_DATASET__FOV_UNDISTORTER_H
+#define MONO_DATASET__FOV_UNDISTORTER_H
 
 #include <opencv2/core/core.hpp>
 #include "ExposureImage.h"
@@ -94,3 +96,6 @@ private:
 
 	bool valid;
 };
+
+#endif // MONO_DATASET__FOV_UNDISTORTER_H
+

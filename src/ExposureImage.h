@@ -28,6 +28,8 @@
  */
 
 
+#ifndef MONO_DATASET__EXPOSURE_IMAGE_H
+#define MONO_DATASET__EXPOSURE_IMAGE_H
 
 
 class ExposureImage
@@ -50,3 +52,4 @@ public:
 	}
 };
 
+#endif // MONO_DATASET__EXPOSURE_IMAGE_H
